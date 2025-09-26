@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Productos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4">Gestión de Productos</h2>
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Disponibilidad</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Hot Dog Clásico</td>
+          <td>$2.500</td>
+          <td id="disp1">Disponible</td>
+          <td>
+            <button class="btn btn-warning btn-sm" onclick="toggleDisponibilidad(1)">Cambiar</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Hot Dog Italiano</td>
+          <td>$3.000</td>
+          <td id="disp2">Disponible</td>
+          <td>
+            <button class="btn btn-warning btn-sm" onclick="toggleDisponibilidad(2)">Cambiar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Mensaje de confirmación -->
+    <div id="mensaje" class="alert alert-success d-none" role="alert">
+      Estado del producto actualizado correctamente.
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function toggleDisponibilidad(id) {
+      const elem = document.getElementById('disp' + id);
+      if (elem.innerText === 'Disponible') {
+        elem.innerText = 'No disponible';
+      } else {
+        elem.innerText = 'Disponible';
+      }
+
+      // Mostrar mensaje temporal
+      const msg = document.getElementById('mensaje');
+      msg.classList.remove('d-none');
+      setTimeout(() => { msg.classList.add('d-none'); }, 3000);
+    }
+  </script>
+</body>
+</html>

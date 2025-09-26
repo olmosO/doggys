@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generación de Boleta</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4">Generación de Boleta Electrónica</h2>
+
+    <!-- Datos del cliente y pedido -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Nombre Cliente</label>
+        <input type="text" class="form-control" id="nombreCliente" placeholder="Juan Pérez">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Correo Cliente</label>
+        <input type="email" class="form-control" id="correoCliente" placeholder="juan@example.com">
+      </div>
+    </div>
+
+    <!-- Tabla con productos del pedido -->
+    <h4>Detalle del Pedido</h4>
+    <table class="table table-striped" id="tablaPedido">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Hot Dog Clásico</td>
+          <td>2</td>
+          <td>$5.000</td>
+        </tr>
+        <tr>
+          <td>Hot Dog Italiano</td>
+          <td>1</td>
+          <td>$3.000</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mt-3 mb-3">
+      <strong>Total: $<span id="totalPedido">8.000</span></strong>
+    </div>
+
+    <!-- Botón para generar boleta -->
+    <button class="btn btn-primary" onclick="generarBoleta()">Generar Boleta</button>
+
+    <!-- Mensajes de éxito / error -->
+    <div class="mt-3">
+      <div id="mensajeExito" class="alert alert-success d-none" role="alert">
+        Boleta generada exitosamente y enviada al correo del cliente.
+      </div>
+      <div id="mensajeError" class="alert alert-danger d-none" role="alert">
+        Error al generar la boleta. Intente nuevamente.
+      </div>
+      <div id="mensajeCampos" class="alert alert-warning d-none" role="alert">
+        Debe completar el nombre y correo del cliente.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script simple para mockup -->
+  <script>
+    function generarBoleta() {
+      const nombre = document.getElementById('nombreCliente').value.trim();
+      const correo = document.getElementById('correoCliente').value.trim();
+
+      // Validar campos vacíos
+      if(nombre === "" || correo === "") {
+        document.getElementById('mensajeCampos').classList.remove('d-none');
+        document.getElementById('mensajeExito').classList.add('d-none');
+        document.getElementById('mensajeError').classList.add('d-none');
+        return;
+      }
+
+      document.getElementById('mensajeCampos').classList.add('d-none');
+
+      // Simulación de éxito / error
+      const exito = true; // cambiar a false para simular error
+
+      if(exito) {
+        document.getElementById('mensajeExito').classList.remove('d-none');
+        document.getElementById('mensajeError').classList.add('d-none');
+      } else {
+        document.getElementById('mensajeError').classList.remove('d-none');
+        document.getElementById('mensajeExito').classList.add('d-none');
+      }
+    }
+  </script>
+</body>
+</html>

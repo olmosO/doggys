@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estado del Pedido</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4">Estado de mi Pedido</h2>
+
+    <!-- Progreso del pedido -->
+    <ul class="list-group" id="progresoPedido">
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        Confirmado
+        <span class="badge bg-success rounded-pill">✔</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center" id="preparacion">
+        En preparación
+        <span class="badge bg-secondary rounded-pill">•</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center" id="enCamino">
+        En camino
+        <span class="badge bg-secondary rounded-pill">•</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center" id="entregado">
+        Entregado
+        <span class="badge bg-secondary rounded-pill">•</span>
+      </li>
+    </ul>
+
+    <!-- Mensaje de notificación -->
+    <div id="mensaje" class="alert alert-info mt-3 d-none">
+      Su pedido ha cambiado de estado.
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Simulación de cambios de estado
+    const estados = ["preparacion", "enCamino", "entregado"];
+    let indice = 0;
+
+    function actualizarEstado() {
+      if (indice < estados.length) {
+        const elem = document.getElementById(estados[indice]);
+        elem.querySelector("span").classList.replace("bg-secondary", "bg-success");
+        document.getElementById("mensaje").classList.remove("d-none");
+        setTimeout(() => {
+          document.getElementById("mensaje").classList.add("d-none");
+        }, 2000);
+        indice++;
+      }
+    }
+
+    // Simular actualización cada 5 segundos
+    setInterval(actualizarEstado, 5000);
+  </script>
+</body>
+</html>
