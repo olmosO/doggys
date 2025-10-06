@@ -1,0 +1,129 @@
+/* ===============================
+   Doggy’s - Estilos globales
+   =============================== */
+
+/* Tipografía general */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #FFF8E1; /* fondo crema */
+    color: #4A2C2A; /* texto principal */
+}
+
+/* Contenedor principal para empujar footer */
+.container-main {
+    flex: 1; /* toma todo el espacio disponible */
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===============================
+   Navbar
+   =============================== */
+.navbar {
+    background-color: #D62828 !important; /* rojo ketchup */
+}
+.navbar-brand, 
+.nav-link {
+    color: #FFFFFF !important;
+    font-weight: 600;
+}
+.nav-link:hover {
+    color: #F6BD60 !important; /* mostaza */
+}
+
+/* ===============================
+   Botones
+   =============================== */
+.btn-primary {
+    background-color: #D62828;
+    border: none;
+    color: #FFFFFF;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+.btn-primary:hover {
+    background-color: #F6BD60;
+    color: #4A2C2A;
+}
+
+.btn-secondary {
+    background-color: #F6BD60;
+    color: #4A2C2A;
+    border: none;
+    border-radius: 6px;
+}
+.btn-secondary:hover {
+    background-color: #D62828;
+    color: #FFFFFF;
+}
+
+/* ===============================
+   Tarjetas de producto / paneles
+   =============================== */
+.product-card, .card {
+    background-color: #FFFFFF;
+    border: 2px solid #F6BD60;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.product-card:hover, .card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ===============================
+   Formularios
+   =============================== */
+input, select, textarea {
+    border: 1px solid #F6BD60;
+    border-radius: 6px;
+    padding: 8px;
+}
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #D62828;
+    box-shadow: 0 0 4px rgba(214,40,40,0.4);
+}
+
+/* ===============================
+   Mensajes de estado
+   =============================== */
+.alert-success {
+    background-color: #76A21E;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+}
+.alert-danger {
+    background-color: #C1121F;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+}
+
+/* ===============================
+   Footer sticky al fondo
+   =============================== */
+footer {
+    background-color: #D62828;
+    color: #FFFFFF;
+    padding: 15px 0;
+    text-align: center;
+    margin-top: auto; /* empuja el footer al final */
+}
+footer p {
+    margin: 0;
+    font-size: 14px;
+}

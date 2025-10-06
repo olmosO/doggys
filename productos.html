@@ -3,63 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Productos</title>
+  <title>Panel de Administración - Productos</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container mt-5">
-    <h2 class="mb-4">Gestión de Productos</h2>
 
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Precio</th>
-          <th>Disponibilidad</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Hot Dog Clásico</td>
-          <td>$2.500</td>
-          <td id="disp1">Disponible</td>
-          <td>
-            <button class="btn btn-warning btn-sm" onclick="toggleDisponibilidad(1)">Cambiar</button>
-          </td>
-        </tr>
-        <tr>
-          <td>Hot Dog Italiano</td>
-          <td>$3.000</td>
-          <td id="disp2">Disponible</td>
-          <td>
-            <button class="btn btn-warning btn-sm" onclick="toggleDisponibilidad(2)">Cambiar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Mensaje de confirmación -->
-    <div id="mensaje" class="alert alert-success d-none" role="alert">
-      Estado del producto actualizado correctamente.
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Doggy's</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="dashboard_productos.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
+        <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
+        <li class="nav-item"><a class="nav-link" href="login.html">Cerrar Sesión</a></li>
+      </ul>
     </div>
   </div>
+</nav>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    function toggleDisponibilidad(id) {
-      const elem = document.getElementById('disp' + id);
-      if (elem.innerText === 'Disponible') {
-        elem.innerText = 'No disponible';
-      } else {
-        elem.innerText = 'Disponible';
-      }
+<!-- Contenido principal -->
+<div class="container mt-5">
+  <h2 class="mb-4">Gestión de Productos</h2>
 
-      // Mostrar mensaje temporal
-      const msg = document.getElementById('mensaje');
-      msg.classList.remove('d-none');
-      setTimeout(() => { msg.classList.add('d-none'); }, 3000);
-    }
-  </script>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Precio</th>
+        <th>Disponibilidad</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Hot Dog Clásico</td>
+        <td>$2.500</td>
+        <td id="disp1">Disponible</td>
+        <td>
+          <button class="btn btn-warning btn-sm" onclick="toggleDisponibilidad(1)">Cambiar</button>
+        </td>
+      </tr>
+      <tr>
+        <td>Hot Dog Italiano</td>
+        <td>$3.000</td>
+        <td id="disp2">Disponible</td>
+        <td>
+          <button class="btn btn-warning btn-sm" onclick="toggleDisponibilidad(2)">Cambiar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Mensaje de confirmación -->
+  <div id="mensaje" class="alert alert-success d-none" role="alert">
+    Estado del producto actualizado correctamente.
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-content text-center py-3">
+    <p>© 2025 Doggy’s — Todos los derechos reservados.</p>
+    <p>Hecho con 🌭 y ❤️ en Chile.</p>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script disponibilidad -->
+<script>
+function toggleDisponibilidad(id) {
+  const elem = document.getElementById('disp' + id);
+  if (elem.innerText === 'Disponible') {
+    elem.innerText = 'No disponible';
+  } else {
+    elem.innerText = 'Disponible';
+  }
+
+  // Mostrar mensaje temporal
+  const msg = document.getElementById('mensaje');
+  msg.classList.remove('d-none');
+  setTimeout(() => { msg.classList.add('d-none'); }, 3000);
+}
+</script>
+
+<!-- Script inactividad -->
+<script src="inactividad.js"></script>
+
 </body>
 </html>

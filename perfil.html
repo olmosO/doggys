@@ -3,12 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editar Perfil</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Perfil de Cliente</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Doggy's</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
+        <li class="nav-item"><a class="nav-link" href="menu_carrito.html">Carrito</a></li>
+        <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
+        <li class="nav-item"><a class="nav-link" href="login.html">Iniciar Sesión</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Contenido principal -->
+<div class="container-main">
   <div class="container mt-5">
-    <h2>Editar Perfil</h2>
+    <h2 class="mb-4">Editar Perfil</h2>
+
     <form id="perfilForm" class="row g-3">
       <div class="col-md-6">
         <label for="nombre" class="form-label">Nombre completo</label>
@@ -31,26 +54,42 @@
     <div id="mensajeExito" class="alert alert-success mt-3 d-none">Perfil actualizado con éxito.</div>
     <div id="mensajeError" class="alert alert-danger mt-3 d-none">Por favor revisa los campos ingresados.</div>
   </div>
+</div>
 
-  <script>
-    document.getElementById("perfilForm").addEventListener("submit", function(e) {
-      e.preventDefault();
+<!-- Footer -->
+<footer>
+  <div class="footer-content">
+    <p>© 2025 Doggy’s — Todos los derechos reservados.</p>
+    <p>Hecho con 🌭 y ❤️ en Chile.</p>
+  </div>
+</footer>
 
-      const nombre = document.getElementById("nombre").value.trim();
-      const telefono = document.getElementById("telefono").value.trim();
-      const direccion = document.getElementById("direccion").value.trim();
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-      // Regex flexible: acepta +, dígitos, espacios y guiones
-      const telefonoValido = /^\+?[\d\s-]{8,20}$/;
+<!-- Validación formulario -->
+<script>
+document.getElementById("perfilForm").addEventListener("submit", function(e) {
+  e.preventDefault();
 
-      if (!nombre || !direccion || !telefonoValido.test(telefono)) {
-        document.getElementById("mensajeError").classList.remove("d-none");
-        document.getElementById("mensajeExito").classList.add("d-none");
-      } else {
-        document.getElementById("mensajeExito").classList.remove("d-none");
-        document.getElementById("mensajeError").classList.add("d-none");
-      }
-    });
-  </script>
+  const nombre = document.getElementById("nombre").value.trim();
+  const telefono = document.getElementById("telefono").value.trim();
+  const direccion = document.getElementById("direccion").value.trim();
+
+  const telefonoValido = /^\+?[\d\s-]{8,20}$/;
+
+  if (!nombre || !direccion || !telefonoValido.test(telefono)) {
+    document.getElementById("mensajeError").classList.remove("d-none");
+    document.getElementById("mensajeExito").classList.add("d-none");
+  } else {
+    document.getElementById("mensajeExito").classList.remove("d-none");
+    document.getElementById("mensajeError").classList.add("d-none");
+  }
+});
+</script>
+
+<!-- Script inactividad -->
+<script src="inactividad.js"></script>
+
 </body>
 </html>

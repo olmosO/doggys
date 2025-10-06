@@ -6,9 +6,31 @@
   <title>Panel de Administración - Gestión de Productos</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
+<!-- Header / Navbar -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="index.html">Doggy's</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
+        <li class="nav-item"><a class="nav-link" href="menu_carrito.html">Carrito</a></li>
+        <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
+        <li class="nav-item"><a class="nav-link" href="login.html">Iniciar Sesión</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Contenido principal -->
+<div class="container-main">
   <div class="container mt-5">
     <h2 class="mb-4">Gestión de Productos</h2>
 
@@ -53,8 +75,21 @@
       </tbody>
     </table>
   </div>
+</div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Footer -->
+<footer>
+  <div class="footer-content">
+    <p>© 2025 Doggy’s — Todos los derechos reservados.</p>
+    <p>Hecho con 🌭 y ❤️ en Chile.</p>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script de inactividad -->
+<script src="inactividad.js"></script>
+
 </body>
 </html>
