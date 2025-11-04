@@ -40,7 +40,7 @@
       Inicio de sesión exitoso. ¡Bienvenido!
     </div>
     <div id="alert-error" class="alert alert-danger d-none" role="alert">
-      Usuario o contraseña incorrectos. Intente nuevamente.
+      El correo ingresado no existe o es incorrecto.
     </div>
 
     <form id="loginForm">
@@ -48,10 +48,8 @@
         <label for="email" class="form-label">Correo electrónico</label>
         <input type="email" class="form-control" id="email" placeholder="juan@example.com" required>
       </div>
-      <div class="mb-3">
-        <label for="password" class="form-label">Contraseña</label>
-        <input type="password" class="form-control" id="password" placeholder="********" required>
-      </div>
+
+      <!-- Eliminado el campo de contraseña para simplificar la autenticación -->
       <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
     </form>
 
@@ -72,29 +70,7 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Script de login mockup -->
-<script>
-  const loginForm = document.getElementById('loginForm');
-  const alertSuccess = document.getElementById('alert-success');
-  const alertError = document.getElementById('alert-error');
-
-  loginForm.addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    // Simulación simple: cualquier correo + contraseña "1234" es válido
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    if(password === "1234") {
-      alertSuccess.classList.remove('d-none');
-      alertError.classList.add('d-none');
-      // Redirigir a perfil tras 1.5 seg (simulación)
-      setTimeout(() => { window.location.href = "perfil.html"; }, 1500);
-    } else {
-      alertError.classList.remove('d-none');
-      alertSuccess.classList.add('d-none');
-    }
-  });
-</script>
+<!-- Script que conecta con el backend -->
+<script src="js/login.js"></script>
 </body>
 </html>
