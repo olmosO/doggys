@@ -1,53 +1,23 @@
-<!-- Esto era un concepto para la inactividad del usuario.
- Se transformo en un script global -->
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cierre de Sesión Automático</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <title>Cerrando sesión...</title>
 </head>
 <body>
-  <div class="container mt-5">
-    <h2 class="mb-4">Bienvenido, Cliente</h2>
-    <p>Su sesión se cerrará automáticamente tras 30 minutos de inactividad.</p>
 
-    <!-- Contador de inactividad -->
-    <div class="alert alert-warning" id="contador">
-      Tiempo de inactividad: <span id="tiempo">0</span> segundos
-    </div>
+<script>
+  // Eliminar toda la información del usuario
+  localStorage.removeItem('usuario_id');
+  localStorage.removeItem('usuario_nombre');
+  localStorage.removeItem('usuario_email');
+  localStorage.removeItem('usuario_rol');
+  localStorage.removeItem('carrito');
+  localStorage.removeItem('pedido_id');
 
-    <button class="btn btn-primary" onclick="reiniciarContador()">Simular actividad</button>
-  </div>
+  // Redirigir al inicio
+  window.location.href = "index.html";
+</script>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    let segundos = 0;
-    let limite = 1800; // 30 minutos en segundos
-
-    function actualizarContador() {
-      segundos++;
-      document.getElementById("tiempo").innerText = segundos;
-
-      if (segundos >= limite) {
-        alert("Sesión expirada por inactividad. Redirigiendo a login.");
-        window.location.href = "login.html"; // Simula redirección a login
-      }
-    }
-
-    function reiniciarContador() {
-      segundos = 0;
-    }
-
-    // Incrementar contador cada segundo
-    setInterval(actualizarContador, 1000);
-
-    // Reiniciar contador con cualquier interacción
-    document.body.addEventListener("mousemove", reiniciarContador);
-    document.body.addEventListener("keydown", reiniciarContador);
-  </script>
 </body>
 </html>

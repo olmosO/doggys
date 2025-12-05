@@ -4,13 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Administración - Gestión de Productos</title>
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- Header / Navbar -->
+<!-- 🔒 PROTECCIÓN ADMIN -->
+<script>
+  const usuarioId = localStorage.getItem("usuario_id");
+  const isAdmin = localStorage.getItem("is_admin");
+
+  // No hay sesión
+  if (!usuarioId) {
+    window.location.href = "login.html";
+  }
+
+  // Sesión pero NO es admin
+  if (isAdmin !== "true") {
+    alert("Acceso denegado. Solo administradores.");
+    window.location.href = "menu.html";
+  }
+
+  // Función cerrar sesión
+  function cerrarSesion() {
+    localStorage.clear();
+    window.location.href = "login.html";
+  }
+</script>
+
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg">
   <div class="container">
     <a class="navbar-brand" href="index.html">Doggy's</a>
@@ -19,11 +41,17 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarMenu">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+
         <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
-        <li class="nav-item"><a class="nav-link" href="menu_carrito.html">Carrito</a></li>
-        <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
-        <li class="nav-item"><a class="nav-link" href="login.html">Iniciar Sesión</a></li>
+
+        <li class="nav-item"><a class="nav-link active" href="dashboard_productos.html">Admin Productos</a></li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="cerrarSesion(); return false;">
+            Cerrar Sesión
+          </a>
+        </li>
+
       </ul>
     </div>
   </div>
@@ -32,15 +60,18 @@
 <!-- Contenido principal -->
 <div class="container-main">
   <div class="container mt-5">
+
     <h2 class="mb-4">Gestión de Productos</h2>
 
     <!-- Botón agregar producto -->
     <div class="mb-3">
-      <button class="btn btn-success">Agregar Producto</button>
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalProducto">
+        Agregar Producto
+      </button>
     </div>
 
     <!-- Tabla de productos -->
-    <table class="table table-striped">
+    <table class="table table-striped" id="tablaProductos">
       <thead>
         <tr>
           <th>ID</th>
@@ -50,46 +81,62 @@
           <th>Acciones</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>Hot Dog Clásico</td>
-          <td>$2.500</td>
-          <td>10</td>
-          <td>
-            <button class="btn btn-primary btn-sm">Editar</button>
-            <button class="btn btn-danger btn-sm">Eliminar</button>
-          </td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Hot Dog Italiano</td>
-          <td>$3.000</td>
-          <td>5</td>
-          <td>
-            <button class="btn btn-primary btn-sm">Editar</button>
-            <button class="btn btn-danger btn-sm">Eliminar</button>
-          </td>
-        </tr>
-        <!-- Más productos de ejemplo -->
-      </tbody>
+      <tbody></tbody>
     </table>
+
   </div>
 </div>
 
-<!-- Footer -->
+<!-- Modal Crear/Editar Producto -->
+<div class="modal fade" id="modalProducto" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitulo">Nuevo Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="formProducto">
+          <input type="hidden" id="producto_id">
+
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombreProducto" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Precio</label>
+            <input type="number" class="form-control" id="precioProducto" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Stock</label>
+            <input type="number" class="form-control" id="stockProducto" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">URL Imagen (opcional)</label>
+            <input type="text" class="form-control" id="imgProducto" placeholder="img/hotdog1.png">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Guardar</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <footer>
   <div class="footer-content">
     <p>© 2025 Doggy’s — Todos los derechos reservados.</p>
-    <p>Hecho con 🌭 y ❤️ en Chile.</p>
   </div>
 </footer>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Script de inactividad -->
+<script src="js/dashboard_productos.js"></script>
 <script src="inactividad.js"></script>
-
 </body>
 </html>

@@ -11,6 +11,20 @@
 </head>
 <body>
 
+<!-- PREVENIR VER LOGIN SI YA ESTÁ LOGUEADO -->
+<script>
+  const usuarioId = localStorage.getItem('usuario_id');
+  const isAdmin = localStorage.getItem('is_admin') === 'true';
+
+  if (usuarioId) {
+    if (isAdmin) {
+      window.location.href = 'dashboard.html';
+    } else {
+      window.location.href = 'perfil.html';
+    }
+  }
+</script>
+
 <!-- Header / Navbar -->
 <nav class="navbar navbar-expand-lg">
   <div class="container">
@@ -49,7 +63,7 @@
         <input type="email" class="form-control" id="email" placeholder="juan@example.com" required>
       </div>
 
-      <!-- Eliminado el campo de contraseña para simplificar la autenticación -->
+      <!-- No hay contraseña porque tu backend no la usa -->
       <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
     </form>
 

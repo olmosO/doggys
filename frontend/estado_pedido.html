@@ -4,13 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Estado del Pedido</title>
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- Header / Navbar -->
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg">
   <div class="container">
     <a class="navbar-brand" href="index.html">Doggy's</a>
@@ -19,7 +18,6 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarMenu">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
         <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
         <li class="nav-item"><a class="nav-link" href="menu_carrito.html">Carrito</a></li>
         <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
@@ -32,32 +30,64 @@
 <!-- Contenido principal -->
 <main class="container-main">
   <div class="container mt-5">
+
     <h2 class="mb-4">Estado de mi Pedido</h2>
 
-    <!-- Progreso del pedido -->
+    <!-- Información del usuario y número de pedido -->
+    <div class="alert alert-secondary">
+      <strong>Pedido N°:</strong> <span id="pedidoIdTexto"></span><br>
+      <strong>Cliente:</strong> <span id="nombreCliente"></span>
+    </div>
+
+    <!-- Estados -->
     <ul class="list-group" id="progresoPedido">
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        Confirmado
-        <span class="badge bg-success rounded-pill">✔</span>
+      <li class="list-group-item d-flex justify-content-between align-items-center" id="estado-pendiente">
+        Pendiente / Creado
+        <span class="badge bg-secondary rounded-pill">•</span>
       </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center" id="preparacion">
+
+      <li class="list-group-item d-flex justify-content-between align-items-center" id="estado-pagado">
+        Pagado
+        <span class="badge bg-secondary rounded-pill">•</span>
+      </li>
+
+      <li class="list-group-item d-flex justify-content-between align-items-center" id="estado-preparacion">
         En preparación
         <span class="badge bg-secondary rounded-pill">•</span>
       </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center" id="enCamino">
+
+      <li class="list-group-item d-flex justify-content-between align-items-center" id="estado-en_camino">
         En camino
         <span class="badge bg-secondary rounded-pill">•</span>
       </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center" id="entregado">
+
+      <li class="list-group-item d-flex justify-content-between align-items-center" id="estado-entregado">
         Entregado
         <span class="badge bg-secondary rounded-pill">•</span>
       </li>
     </ul>
 
-    <!-- Mensaje de notificación -->
-    <div id="mensaje" class="alert alert-info mt-3 d-none">
-      Su pedido ha cambiado de estado.
+    <!-- Productos del pedido -->
+    <h4 class="mt-5">Productos del Pedido</h4>
+
+    <table class="table table-striped" id="tablaItems">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Generado dinámicamente -->
+      </tbody>
+    </table>
+
+    <!-- Mensajes -->
+    <div id="msgCambio" class="alert alert-info d-none mt-3">
+      El estado del pedido ha cambiado.
     </div>
+
   </div>
 </main>
 
@@ -65,35 +95,12 @@
 <footer>
   <div class="footer-content">
     <p>© 2025 Doggy’s — Todos los derechos reservados.</p>
-    <p>Hecho con 🌭 y ❤️ en Chile.</p>
   </div>
 </footer>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Script de inactividad para usuario protegido -->
+<script src="js/estado_pedido.js"></script>
 <script src="inactividad.js"></script>
 
-<script>
-  // Simulación de cambios de estado
-  const estados = ["preparacion", "enCamino", "entregado"];
-  let indice = 0;
-
-  function actualizarEstado() {
-    if (indice < estados.length) {
-      const elem = document.getElementById(estados[indice]);
-      elem.querySelector("span").classList.replace("bg-secondary", "bg-success");
-      document.getElementById("mensaje").classList.remove("d-none");
-      setTimeout(() => {
-        document.getElementById("mensaje").classList.add("d-none");
-      }, 2000);
-      indice++;
-    }
-  }
-
-  // Simular actualización cada 5 segundos
-  setInterval(actualizarEstado, 5000);
-</script>
 </body>
 </html>

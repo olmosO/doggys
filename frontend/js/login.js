@@ -7,14 +7,11 @@ if (loginForm) {
     event.preventDefault();
 
     const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
 
     if (!email) {
-      if (loginAlertError) {
-        loginAlertError.textContent = 'Debe ingresar un correo.';
-        loginAlertError.classList.remove('d-none');
-      }
-      if (loginAlertSuccess) loginAlertSuccess.classList.add('d-none');
+      loginAlertError.textContent = 'Debe ingresar un correo.';
+      loginAlertError.classList.remove('d-none');
+      loginAlertSuccess.classList.add('d-none');
       return;
     }
 
@@ -26,32 +23,44 @@ if (loginForm) {
       });
 
       if (!res.ok) {
-        throw new Error('Credenciales inválidas');
+        throw new Error('Correo no registrado');
       }
 
       const data = await res.json();
 
+      // Verificación extra
+      if (!data.usuario_id) {
+        throw new Error("El backend no envió el usuario_id");
+      }
+
       // Guardar datos de sesión
       localStorage.setItem('usuario_id', data.usuario_id);
-      localStorage.setItem('usuario_nombre', data.nombre);
-      localStorage.setItem('usuario_email', data.email);
+      localStorage.setItem('usuario_nombre', data.nombre || "");
+      localStorage.setItem('usuario_email', data.email || "");
 
-      if (loginAlertSuccess) {
-        loginAlertSuccess.textContent = 'Inicio de sesión exitoso. ¡Bienvenido, ' + data.nombre + '!';
-        loginAlertSuccess.classList.remove('d-none');
-      }
-      if (loginAlertError) loginAlertError.classList.add('d-none');
+      // Si no viene "is_admin", asumimos false
+      const adminFlag = data.is_admin === true;
+      localStorage.setItem('is_admin', adminFlag);
 
+      loginAlertSuccess.textContent =
+        `Inicio de sesión exitoso. ¡Bienvenido, ${data.nombre}!`;
+      loginAlertSuccess.classList.remove('d-none');
+      loginAlertError.classList.add('d-none');
+
+      // Redirección según rol
       setTimeout(() => {
-        window.location.href = 'perfil.html';
-      }, 1500);
+        if (adminFlag) {
+          window.location.href = 'dashboard_productos.html';
+        } else {
+          window.location.href = 'menu.html';
+        }
+      }, 800);
+
     } catch (err) {
       console.error(err);
-      if (loginAlertError) {
-        loginAlertError.textContent = 'Correo o contraseña incorrectos.';
-        loginAlertError.classList.remove('d-none');
-      }
-      if (loginAlertSuccess) loginAlertSuccess.classList.add('d-none');
+      loginAlertError.textContent = 'Correo incorrecto o no registrado.';
+      loginAlertError.classList.remove('d-none');
+      loginAlertSuccess.classList.add('d-none');
     }
   });
 }

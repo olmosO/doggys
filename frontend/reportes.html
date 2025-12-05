@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
 <!-- Navbar -->
@@ -19,121 +21,80 @@
     <div class="collapse navbar-collapse" id="navbarMenu">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="dashboard_productos.html">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
-        <li class="nav-item"><a class="nav-link" href="reportes.html">Reportes</a></li>
-        <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
-        <li class="nav-item"><a class="nav-link" href="login.html">Cerrar Sesión</a></li>
+        <li class="nav-item"><a class="nav-link active" href="reportes.html">Reportes</a></li>
+        <li class="nav-item"><a class="nav-link" onclick="cerrarSesion()" style="cursor:pointer;">Cerrar Sesión</a></li>
       </ul>
     </div>
   </div>
 </nav>
 
-<!-- Contenido principal -->
+<!-- Contenido -->
 <div class="container mt-5">
+
   <h2 class="mb-4">Reportes de Ventas</h2>
 
-  <!-- Filtros combinados: tipo de producto + rango de fechas -->
-  <form id="formFiltros" class="row g-3 mb-4" onsubmit="return aplicarFiltros()">
+  <!-- Filtros -->
+  <form id="formFiltros" class="row g-3 mb-4">
     <div class="col-md-4">
       <label class="form-label">Tipo de producto</label>
-      <select class="form-select" id="tipoProducto">
+      <select id="tipoProducto" class="form-select">
         <option value="todos">Todos</option>
         <option value="hot dog">Hot Dogs</option>
         <option value="completo">Completos</option>
       </select>
     </div>
+
     <div class="col-md-4">
       <label class="form-label">Desde</label>
-      <input type="date" class="form-control" id="fechaDesde">
+      <input type="date" id="fechaDesde" class="form-control">
     </div>
+
     <div class="col-md-4">
       <label class="form-label">Hasta</label>
-      <input type="date" class="form-control" id="fechaHasta">
+      <input type="date" id="fechaHasta" class="form-control">
     </div>
+
     <div class="col-12">
-      <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+      <button type="submit" class="btn btn-primary">Aplicar filtros</button>
     </div>
   </form>
 
-  <!-- Tabla de reportes -->
+  <!-- Tabla -->
   <table class="table table-striped" id="tablaReportes">
     <thead>
       <tr>
         <th>Producto</th>
         <th>Cantidad Vendida</th>
+        <th>Subtotal</th>
         <th>Fecha</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td>Hot Dog Clásico</td>
-        <td>15</td>
-        <td>2025-09-25</td>
-      </tr>
-      <tr>
-        <td>Completo Italiano</td>
-        <td>8</td>
-        <td>2025-09-25</td>
-      </tr>
-      <tr>
-        <td>Hot Dog Especial</td>
-        <td>12</td>
-        <td>2025-09-24</td>
-      </tr>
-    </tbody>
+    <tbody></tbody>
   </table>
 
-  <!-- Mensaje si no hay resultados -->
-  <div id="mensaje" class="alert alert-info mt-3 d-none">
+  <!-- Mensaje sin resultados -->
+  <div id="mensaje" class="alert alert-info d-none mt-3">
     No se encontraron ventas para los filtros seleccionados.
   </div>
+
 </div>
 
-<!-- Footer -->
 <footer>
   <div class="footer-content text-center py-3">
     <p>© 2025 Doggy’s — Todos los derechos reservados.</p>
-    <p>Hecho con 🌭 y ❤️ en Chile.</p>
   </div>
 </footer>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Script filtros -->
 <script>
-function aplicarFiltros() {
-  const tipo = document.getElementById("tipoProducto").value.toLowerCase();
-  const desde = document.getElementById("fechaDesde").value;
-  const hasta = document.getElementById("fechaHasta").value;
-
-  const tbody = document.querySelector("#tablaReportes tbody");
-  const filas = Array.from(tbody.rows);
-
-  let encontrados = 0;
-
-  filas.forEach(fila => {
-    const producto = fila.cells[0].innerText.toLowerCase();
-    const fecha = fila.cells[2].innerText;
-
-    let mostrar = true;
-
-    if (tipo !== "todos" && !producto.includes(tipo)) mostrar = false;
-    if (desde && fecha < desde) mostrar = false;
-    if (hasta && fecha > hasta) mostrar = false;
-
-    fila.style.display = mostrar ? "" : "none";
-    if (mostrar) encontrados++;
-  });
-
-  document.getElementById("mensaje").classList.toggle("d-none", encontrados > 0);
-
-  return false; // evitar submit real
+function cerrarSesion() {
+  localStorage.clear();
+  window.location.href = "login.html";
 }
 </script>
 
-<!-- Script inactividad -->
+<script src="js/reportes.js"></script>
 <script src="inactividad.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

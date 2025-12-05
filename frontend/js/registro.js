@@ -11,16 +11,20 @@ if (registroForm) {
     const email = document.getElementById('email').value.trim();
     const telefono = document.getElementById('telefono').value.trim();
     const direccion = document.getElementById('direccion').value.trim();
-    const password = document.getElementById('password').value;
-    const passwordConfirm = document.getElementById('passwordConfirm').value;
 
-    // Validación simple de contraseña igual
-    if (password !== passwordConfirm) {
-      if (alertError) {
-        alertError.textContent = 'Las contraseñas no coinciden. Intente de nuevo.';
-        alertError.classList.remove('d-none');
-      }
-      if (alertSuccess) alertSuccess.classList.add('d-none');
+    // Validación mínima
+    if (!nombre || !apellido || !email || !direccion) {
+      alertError.textContent = 'Debe completar todos los campos obligatorios.';
+      alertError.classList.remove('d-none');
+      alertSuccess.classList.add('d-none');
+      return;
+    }
+
+    const telefonoValido = /^\+?[\d\s-]{8,20}$/;
+    if (telefono && !telefonoValido.test(telefono)) {
+      alertError.textContent = 'Ingrese un teléfono válido.';
+      alertError.classList.remove('d-none');
+      alertSuccess.classList.add('d-none');
       return;
     }
 
@@ -28,7 +32,8 @@ if (registroForm) {
       nombre: (nombre + ' ' + apellido).trim(),
       email,
       telefono,
-      direccion
+      direccion,
+      is_admin: false   // Importante para mantener consistencia con Pydantic
     };
 
     try {
@@ -39,7 +44,17 @@ if (registroForm) {
       });
 
       if (!res.ok) {
-        throw new Error('Error en la respuesta del servidor');
+        const errData = await res.json();
+        let msg = 'Ocurrió un error al registrar.';
+
+        if (errData.detail === 'Correo ya registrado') {
+          msg = 'Este correo ya está registrado.';
+        }
+
+        alertError.textContent = msg;
+        alertError.classList.remove('d-none');
+        alertSuccess.classList.add('d-none');
+        return;
       }
 
       const data = await res.json();
@@ -47,25 +62,25 @@ if (registroForm) {
       // Guardar usuario en localStorage
       localStorage.setItem('usuario_id', data.id);
       localStorage.setItem('usuario_nombre', data.nombre);
-      localStorage.setItem('usuario_email', data.email || email);
+      localStorage.setItem('usuario_email', data.email);
+      localStorage.setItem('is_admin', data.is_admin);  // <-- Nuevo
+      localStorage.setItem('usuario_direccion', data.direccion || direccion);
+      localStorage.setItem('usuario_telefono', data.telefono || telefono);
 
-      if (alertSuccess) {
-        alertSuccess.textContent = 'Registro exitoso. ¡Bienvenido, ' + data.nombre + '!';
-        alertSuccess.classList.remove('d-none');
-      }
-      if (alertError) alertError.classList.add('d-none');
+      alertSuccess.textContent = 'Registro exitoso. ¡Bienvenido, ' + data.nombre + '!';
+      alertSuccess.classList.remove('d-none');
+      alertError.classList.add('d-none');
 
-      // Redirigir al menú luego de un momento
+      // Redirigir al perfil después de registrarse
       setTimeout(() => {
-        window.location.href = 'menu.html';
+        window.location.href = 'perfil.html';
       }, 1500);
+
     } catch (err) {
       console.error(err);
-      if (alertError) {
-        alertError.textContent = 'Ocurrió un error al registrar. Intente nuevamente.';
-        alertError.classList.remove('d-none');
-      }
-      if (alertSuccess) alertSuccess.classList.add('d-none');
+      alertError.textContent = 'Error inesperado. Intente nuevamente.';
+      alertError.classList.remove('d-none');
+      alertSuccess.classList.add('d-none');
     }
   });
 }

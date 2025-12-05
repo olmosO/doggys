@@ -22,3 +22,17 @@ setInterval(actualizarContador, 1000);
 ['mousemove', 'keydown', 'click', 'scroll'].forEach(evt => {
   document.body.addEventListener(evt, reiniciarContador);
 });
+
+
+function cerrarSesion() {
+  // Borrar todo lo relacionado al usuario
+  localStorage.removeItem('usuario_id');
+  localStorage.removeItem('usuario_nombre');
+  localStorage.removeItem('usuario_email');
+  localStorage.removeItem('usuario_rol');
+  localStorage.removeItem('carrito');
+  localStorage.removeItem('pedido_id');
+
+  // Redirigir al inicio (puede ser login.html si prefieres)
+  window.location.href = 'index.html';
+}

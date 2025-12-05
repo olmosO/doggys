@@ -6,12 +6,19 @@
   <title>Confirmar Pedido</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- CSS común -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- Header / Navbar -->
+<!-- 🔒 Protección: no permitir checkout sin login -->
+<script>
+  const usuarioId = localStorage.getItem('usuario_id');
+  if (!usuarioId) {
+    window.location.href = 'login.html';
+  }
+</script>
+
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg">
   <div class="container">
     <a class="navbar-brand" href="index.html">Doggy's</a>
@@ -20,39 +27,45 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarMenu">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+
         <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
         <li class="nav-item"><a class="nav-link" href="menu_carrito.html">Carrito</a></li>
-        <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
-        <li class="nav-item"><a class="nav-link" href="login.html">Iniciar Sesión</a></li>
+
+        <li class="nav-item"><a class="nav-link" id="perfil-link" href="perfil.html">Perfil</a></li>
+        <li class="nav-item"><a class="nav-link" id="login-link" href="login.html">Iniciar Sesión</a></li>
+
       </ul>
     </div>
   </div>
 </nav>
+
+<script>
+  // Ajuste dinámico del navbar
+  if (usuarioId) {
+    document.getElementById("login-link").style.display = "none";
+  } else {
+    document.getElementById("perfil-link").style.display = "none";
+  }
+</script>
 
 <!-- Contenido principal -->
 <div class="container-main">
   <div class="container mt-5">
     <h2 class="mb-4 text-center">Confirmar Pedido</h2>
 
-    <!-- Resumen del carrito -->
+    <!-- Resumen del carrito (dinámico) -->
     <div class="mb-4">
-      <h4>Productos en el carrito</h4>
+      <h4>Productos en tu carrito</h4>
       <ul class="list-group" id="listaCarrito">
-        <li class="list-group-item d-flex justify-content-between">
-          Hot Dog Clásico
-          <span>$2.500</span>
-        </li>
-        <li class="list-group-item d-flex justify-content-between">
-          Hot Dog Italiano
-          <span>$3.000</span>
-        </li>
+        <!-- Llenado dinámico desde checkout.js -->
       </ul>
-      <p class="mt-2 fw-bold">Total: $5.500</p>
+      <p class="mt-2 fw-bold">
+        Total: $<span id="totalCarrito">0</span>
+      </p>
     </div>
 
-    <!-- Formulario de pago (mockup) -->
-    <form id="formPago" onsubmit="return procesarPago()">
+    <!-- Formulario de pago -->
+    <form id="formPago">
       <div class="mb-3">
         <label class="form-label">Método de pago</label>
         <select class="form-select" id="metodoPago">
@@ -60,16 +73,13 @@
           <option value="servipag">Servipag</option>
         </select>
       </div>
+
       <button type="submit" class="btn btn-success">Pagar Pedido</button>
     </form>
 
     <!-- Mensajes -->
-    <div id="mensajeExito" class="alert alert-success mt-3 d-none">
-      Pago realizado con éxito. Se ha enviado confirmación por correo.
-    </div>
-    <div id="mensajeError" class="alert alert-danger mt-3 d-none">
-      Pago rechazado, intente nuevamente.
-    </div>
+    <div id="mensajeExito" class="alert alert-success mt-3 d-none"></div>
+    <div id="mensajeError" class="alert alert-danger mt-3 d-none"></div>
   </div>
 </div>
 
@@ -84,8 +94,9 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-
+<!-- Script para procesar el pago -->
 <script src="js/checkout.js"></script>
 <script src="inactividad.js"></script>
+
 </body>
 </html>
