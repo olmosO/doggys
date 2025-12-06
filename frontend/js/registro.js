@@ -11,9 +11,10 @@ if (registroForm) {
     const email = document.getElementById('email').value.trim();
     const telefono = document.getElementById('telefono').value.trim();
     const direccion = document.getElementById('direccion').value.trim();
+    const password = document.getElementById('password').value.trim(); // NUEVO
 
     // Validación mínima
-    if (!nombre || !apellido || !email || !direccion) {
+    if (!nombre || !apellido || !email || !direccion || !password) {
       alertError.textContent = 'Debe completar todos los campos obligatorios.';
       alertError.classList.remove('d-none');
       alertSuccess.classList.add('d-none');
@@ -33,7 +34,8 @@ if (registroForm) {
       email,
       telefono,
       direccion,
-      is_admin: false   // Importante para mantener consistencia con Pydantic
+      password, // Enviamos la password
+      is_admin: false
     };
 
     try {
@@ -59,11 +61,11 @@ if (registroForm) {
 
       const data = await res.json();
 
-      // Guardar usuario en localStorage
+      // Guardar usuario en localStorage para auto-login
       localStorage.setItem('usuario_id', data.id);
       localStorage.setItem('usuario_nombre', data.nombre);
       localStorage.setItem('usuario_email', data.email);
-      localStorage.setItem('is_admin', data.is_admin);  // <-- Nuevo
+      localStorage.setItem('is_admin', data.is_admin);
       localStorage.setItem('usuario_direccion', data.direccion || direccion);
       localStorage.setItem('usuario_telefono', data.telefono || telefono);
 
@@ -71,7 +73,7 @@ if (registroForm) {
       alertSuccess.classList.remove('d-none');
       alertError.classList.add('d-none');
 
-      // Redirigir al perfil después de registrarse
+      // Redirigir al perfil
       setTimeout(() => {
         window.location.href = 'perfil.html';
       }, 1500);

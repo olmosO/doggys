@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doggy's - Menú</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg">
     <div class="container">
         <a class="navbar-brand" href="index.html">Doggy's</a>
@@ -22,52 +20,83 @@
                 <li class="nav-item"><a class="nav-link active" href="menu.html">Menú</a></li>
                 <li class="nav-item"><a class="nav-link" href="menu_carrito.html">Carrito</a></li>
 
-                <!-- Mostrar según login -->
-                <li class="nav-item"><a class="nav-link" id="perfil-link" href="perfil.html">Perfil</a></li>
+                <li class="nav-item dropdown" id="admin-panel" style="display:none;">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Panel Admin</a>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="dashboard_productos.html">Gestión Productos</a></li>
+                    <li><a class="dropdown-item" href="reportes.html">Reportes Ventas</a></li>
+                  </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" id="perfil-link" href="perfil.html" style="display:none;">Mi Perfil</a></li>
+
                 <li class="nav-item"><a class="nav-link" id="login-link" href="login.html">Iniciar Sesión</a></li>
+                <li class="nav-item"><a class="nav-link text-warning" id="logout-link" href="#" style="display:none;">Cerrar Sesión</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
-<script>
-  // Mostrar / ocultar opciones según si hay sesión
-  const usuarioId = localStorage.getItem('usuario_id');
-  if (usuarioId) {
-    document.getElementById("login-link").style.display = "none";
-  } else {
-    document.getElementById("perfil-link").style.display = "none";
-  }
-</script>
-
 <main class="container-main">
-
-    <!-- Header -->
     <header class="text-center my-5">
         <h1>Menú de Doggy's</h1>
         <p>¡Elige tus hot dogs y completos favoritos!</p>
     </header>
 
-    <!-- Grid de productos (dinámico) -->
     <div class="container">
         <div id="productos-container" class="row g-4 justify-content-center">
-            <!-- Aquí se insertarán los productos desde menu.js -->
-        </div>
+            </div>
     </div>
-
 </main>
 
-<!-- Footer -->
 <footer>
     <div class="footer-content">
         <p>© 2025 Doggy’s — Todos los derechos reservados.</p>
-        <p>Hecho con 🌭 y ❤️ en Chile.</p>
+        <p>Hecho en Chile.</p>
     </div>
 </footer>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Script del menú (lo creo en el siguiente paso) -->
 <script src="js/menu.js"></script>
-<script src="inac
+<script src="inactividad.js"></script>
+
+<script>
+  // Script rápido para controlar navbar en menu.html
+  document.addEventListener("DOMContentLoaded", () => {
+    const usuarioId = localStorage.getItem('usuario_id');
+    const isAdmin = localStorage.getItem('is_admin') === 'true';
+
+    const loginLink = document.getElementById("login-link");
+    const logoutLink = document.getElementById("logout-link");
+    const perfilLink = document.getElementById("perfil-link");
+    const adminPanel = document.getElementById("admin-panel");
+
+    if (usuarioId) {
+      if (loginLink) loginLink.style.display = "none";
+      if (logoutLink) logoutLink.style.display = "block";
+
+      if (isAdmin) {
+        if (adminPanel) adminPanel.style.display = "block";
+        if (perfilLink) perfilLink.style.display = "none";
+      } else {
+        if (adminPanel) adminPanel.style.display = "none";
+        if (perfilLink) perfilLink.style.display = "block";
+      }
+    } else {
+      if (loginLink) loginLink.style.display = "block";
+      if (logoutLink) logoutLink.style.display = "none";
+      if (adminPanel) adminPanel.style.display = "none";
+      if (perfilLink) perfilLink.style.display = "none";
+    }
+
+    if(logoutLink) {
+        logoutLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = "index.html";
+        });
+    }
+  });
+</script>
+</body>
+</html>

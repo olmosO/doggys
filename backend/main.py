@@ -1,5 +1,6 @@
 from typing import List, Optional
 from contextlib import asynccontextmanager
+from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,30 @@ from pydantic import BaseModel, Field, EmailStr
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
+
+import bcrypt  # Importamos la librería directa
+
+# --- SEGURIDAD (Sin passlib) ---
+
+def get_password_hash(password: str) -> str:
+    """Encripta la contraseña usando bcrypt directo."""
+    # Convertimos a bytes
+    pwd_bytes = password.encode('utf-8')
+    # Generamos salt y hasheamos
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(pwd_bytes, salt)
+    # Devolvemos como string para guardar en Mongo
+    return hashed.decode('utf-8')
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verifica si la contraseña coincide con el hash."""
+    try:
+        pwd_bytes = plain_password.encode('utf-8')
+        hash_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(pwd_bytes, hash_bytes)
+    except Exception:
+        return False
+
 
 # ---------------------------------------------------------
 # Configuración MongoDB
@@ -22,13 +47,76 @@ pedidos_col = None
 boletas_col = None
 
 
+# ---------------------------------------------------------
+# DATOS SEMILLA (Seed Data)
+# ---------------------------------------------------------
+async def cargar_datos_iniciales():
+    """Carga usuario admin y productos si las colecciones están vacías."""
+    print("--- Verificando datos iniciales ---")
+
+    # 1. Verificar/Crear ADMIN
+    if await usuarios_col.count_documents({}) == 0:
+        admin_user = {
+            "nombre": "Administrador",
+            "email": "admin@doggys.com",
+            "telefono": "+56912345678",
+            "direccion": "Sucursal Central",
+            "is_admin": True,
+            # Contraseña encriptada por defecto: admin123
+            "password": get_password_hash("admin123")
+        }
+        await usuarios_col.insert_one(admin_user)
+        print("✅ Usuario Admin creado: admin@doggys.com / Pass: admin123")
+    
+    # 2. Verificar/Crear PRODUCTOS
+    if await productos_col.count_documents({}) == 0:
+        productos_iniciales = [
+            {
+                "nombre": "Hot Dog Americano",
+                "descripcion": "Clásico americano con ketchup y mostaza",
+                "precio": 2500.0,
+                "stock": 100,
+                "img": "hotdog1.jpg",
+                "disponible": True
+            },
+            {
+                "nombre": "Hot Dog Especial",
+                "descripcion": "Con salsa de queso y tocino crispy",
+                "precio": 3200.0,
+                "stock": 80,
+                "img": "hotdog2.jpg",
+                "disponible": True
+            },
+            {
+                "nombre": "Completo Italiano",
+                "descripcion": "Palta, tomate y mayo casera",
+                "precio": 2800.0,
+                "stock": 120,
+                "img": "completo1.jpg",
+                "disponible": True
+            },
+            {
+                "nombre": "Completo Dinámico",
+                "descripcion": "Palta, tomate, mayo, chucrut y salsa americana",
+                "precio": 3000.0,
+                "stock": 90,
+                "img": "completo2.jpg",
+                "disponible": True
+            }
+        ]
+        await productos_col.insert_many(productos_iniciales)
+        print("✅ 4 Productos iniciales cargados")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Se ejecuta al iniciar y apagar FastAPI.
-    Aquí abrimos y cerramos la conexión a MongoDB.
+    Aquí abrimos la conexión y cargamos datos semilla.
     """
     global client, db, usuarios_col, productos_col, pedidos_col, boletas_col
+    
+    # 1. Conectar a Mongo
     client = AsyncIOMotorClient(MONGODB_URI)
     db = client[DB_NAME]
 
@@ -36,6 +124,9 @@ async def lifespan(app: FastAPI):
     productos_col = db["productos"]
     pedidos_col = db["pedidos"]
     boletas_col = db["boletas"]
+
+    # 2. Cargar datos iniciales
+    await cargar_datos_iniciales()
 
     try:
         yield
@@ -50,7 +141,7 @@ app = FastAPI(title="API Doggy's - MongoDB", version="2.0.0", lifespan=lifespan)
 # ---------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # si quieres, luego restringes a localhost
+    allow_origins=["*"],  # Permite cualquier origen
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -86,6 +177,7 @@ def producto_doc_to_out(doc) -> "ProductoOut":
         precio=doc["precio"],
         stock=doc.get("stock", 0),
         img=doc.get("img"),
+        disponible=doc.get("disponible", True)
     )
 
 
@@ -94,6 +186,8 @@ def pedido_doc_to_out(doc) -> "PedidoOut":
         PedidoItemOut(
             producto_id=str(item["producto_id"]),
             cantidad=item["cantidad"],
+            # Protección para pedidos antiguos sin nombre
+            nombre=item.get("nombre", "Producto sin nombre"),
             precio_unitario=item["precio_unitario"],
             subtotal=item["subtotal"],
         )
@@ -105,6 +199,8 @@ def pedido_doc_to_out(doc) -> "PedidoOut":
         usuario_id=str(doc["usuario_id"]),
         items=items_out,
         estado=doc["estado"],
+        # Protección para pedidos antiguos sin fecha
+        fecha=doc.get("fecha", doc.get("fecha_pedido")),
         total=doc["total"],
     )
 
@@ -126,56 +222,59 @@ class UsuarioIn(BaseModel):
     telefono: Optional[str] = None
     direccion: Optional[str] = None
     is_admin: bool = False
+    password: str  # Campo obligatorio para registro
 
-
-
-class UsuarioOut(UsuarioIn):
+class UsuarioOut(BaseModel):
     id: str
+    nombre: str
+    email: EmailStr
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+    is_admin: bool = False
+    # No devolvemos la password en la respuesta
 
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
 
 class ProductoIn(BaseModel):
     nombre: str
     descripcion: Optional[str] = None
     precio: float = Field(gt=0, description="Precio > 0")
     stock: int = Field(ge=0, description="Stock no negativo")
-    # Para el menú con imágenes (Opción A):
     img: Optional[str] = Field(
         default=None,
-        description="URL o ruta relativa de imagen (ej: 'img/completo_italiano.png')",
+        description="URL o ruta relativa de imagen",
     )
-
+    disponible: bool = True
 
 class ProductoOut(ProductoIn):
     id: str
 
-
 class PedidoItemIn(BaseModel):
-    producto_id: str  # será un ObjectId en string
+    producto_id: str
     cantidad: int = Field(gt=0)
 
-
 class PedidoItemOut(PedidoItemIn):
+    nombre: Optional[str] = None
     precio_unitario: float
     subtotal: float
-
 
 class PedidoIn(BaseModel):
     usuario_id: str
     items: List[PedidoItemIn]
     estado: str = "pendiente"
 
-
 class PedidoOut(BaseModel):
     id: str
     usuario_id: str
     items: List[PedidoItemOut]
     estado: str
+    fecha: Optional[str] = None
     total: float
-
 
 class BoletaIn(BaseModel):
     pedido_id: str
-
 
 class BoletaOut(BaseModel):
     id: str
@@ -196,12 +295,16 @@ async def health():
 # ---------------------------------------------------------
 @app.post("/usuarios", response_model=UsuarioOut, status_code=201, tags=["usuarios"])
 async def crear_usuario(usuario: UsuarioIn):
-    # opcional: validar que el email no exista
+    # Validar email único
     existente = await usuarios_col.find_one({"email": usuario.email})
     if existente:
         raise HTTPException(status_code=400, detail="Correo ya registrado")
 
-    res = await usuarios_col.insert_one(usuario.model_dump())
+    # Hashear contraseña
+    user_dict = usuario.model_dump()
+    user_dict["password"] = get_password_hash(user_dict["password"])
+
+    res = await usuarios_col.insert_one(user_dict)
     doc = await usuarios_col.find_one({"_id": res.inserted_id})
     return usuario_doc_to_out(doc)
 
@@ -218,7 +321,12 @@ async def obtener_usuario(usuario_id: str):
 @app.put("/usuarios/{usuario_id}", response_model=UsuarioOut, tags=["usuarios"])
 async def actualizar_usuario(usuario_id: str, usuario: UsuarioIn):
     oid = ensure_objectid(usuario_id)
-    res = await usuarios_col.update_one({"_id": oid}, {"$set": usuario.model_dump()})
+    
+    # Preparamos datos y volvemos a hashear la password si viene en el update
+    user_dict = usuario.model_dump()
+    user_dict["password"] = get_password_hash(user_dict["password"])
+
+    res = await usuarios_col.update_one({"_id": oid}, {"$set": user_dict})
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     doc = await usuarios_col.find_one({"_id": oid})
@@ -226,14 +334,21 @@ async def actualizar_usuario(usuario_id: str, usuario: UsuarioIn):
 
 
 @app.post("/usuarios/login", tags=["auth"])
-async def login(email: EmailStr = Body(..., embed=True)):
+async def login(credentials: LoginRequest):
     """
-    Mantiene el contrato que ya usa tu frontend:
-    devuelve { status, usuario_id, nombre, email }
+    Login seguro verificando hash de contraseña.
     """
-    doc = await usuarios_col.find_one({"email": email})
+    doc = await usuarios_col.find_one({"email": credentials.email})
+    
+    # 1. Verificar si existe el usuario
     if not doc:
-        raise HTTPException(status_code=401, detail="Correo no registrado")
+        raise HTTPException(status_code=401, detail="Credenciales incorrectas")
+
+    # 2. Verificar contraseña
+    # (Nota: Algunos usuarios antiguos del Seed podrían no tener 'password' si se creó antes del cambio.
+    #  Agregamos doc.get('password') para evitar crash, aunque fallará login)
+    if not verify_password(credentials.password, doc.get("password", "")):
+        raise HTTPException(status_code=401, detail="Credenciales incorrectas")
 
     u = usuario_doc_to_out(doc)
     return {
@@ -250,7 +365,7 @@ async def login(email: EmailStr = Body(..., embed=True)):
 # ---------------------------------------------------------
 @app.get("/productos", response_model=List[ProductoOut], tags=["productos"])
 async def listar_productos(
-    q: Optional[str] = Query(None, description="Filtro por nombre que contenga 'q'"),
+    q: Optional[str] = Query(None, description="Filtro por nombre"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
 ):
@@ -259,7 +374,7 @@ async def listar_productos(
         query["nombre"] = {"$regex": q, "$options": "i"}
 
     cursor = productos_col.find(query).skip(skip).limit(limit)
-    productos: List[ProductoOut] = []
+    productos = []
     async for doc in cursor:
         productos.append(producto_doc_to_out(doc))
     return productos
@@ -300,22 +415,13 @@ async def eliminar_producto(producto_id: str):
     return None
 
 
-# ---------------------------------------------------------
-# PRODUCTOS: Cambiar estado de disponibilidad
-# ---------------------------------------------------------
 @app.patch("/productos/{producto_id}/disponible", tags=["productos"])
 async def cambiar_disponibilidad(producto_id: str, nuevo_estado: bool = Query(...)):
-    """
-    Cambia si un producto está disponible (True) o no disponible (False)
-    sin modificar precio, stock ni descripción.
-    """
     oid = ensure_objectid(producto_id)
-
     res = await productos_col.update_one(
         {"_id": oid},
         {"$set": {"disponible": nuevo_estado}}
     )
-
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
 
@@ -327,18 +433,35 @@ async def cambiar_disponibilidad(producto_id: str, nuevo_estado: bool = Query(..
 
 
 # ---------------------------------------------------------
-# PEDIDOS (carrito + estado)
+# PEDIDOS (Carrito + Estado + Reportes)
 # ---------------------------------------------------------
+@app.get("/pedidos", response_model=List[PedidoOut], tags=["pedidos"])
+async def listar_pedidos(usuario_id: Optional[str] = Query(None)):
+    """
+    Lista pedidos. Si se da usuario_id, filtra por usuario.
+    Recupera nombres de productos para reportes históricos.
+    """
+    query = {}
+    if usuario_id:
+        query["usuario_id"] = ensure_objectid(usuario_id)
+    
+    cursor = pedidos_col.find(query)
+    pedidos_lista = []
+    
+    async for doc in cursor:
+        pedidos_lista.append(pedido_doc_to_out(doc))
+        
+    return pedidos_lista
+
+
 @app.post("/pedidos", response_model=PedidoOut, status_code=201, tags=["pedidos"])
 async def crear_pedido(pedido: PedidoIn):
     usuario_oid = ensure_objectid(pedido.usuario_id)
 
-    # Validar que exista el usuario
     usuario_doc = await usuarios_col.find_one({"_id": usuario_oid})
     if not usuario_doc:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    # Calcular total y validar stock
     items_db = []
     total = 0.0
 
@@ -362,6 +485,7 @@ async def crear_pedido(pedido: PedidoIn):
         items_db.append(
             {
                 "producto_id": prod_oid,
+                "nombre": prod_doc["nombre"], # Guardamos nombre para el reporte
                 "cantidad": item.cantidad,
                 "precio_unitario": precio,
                 "subtotal": subtotal,
@@ -373,6 +497,7 @@ async def crear_pedido(pedido: PedidoIn):
         "items": items_db,
         "estado": pedido.estado,
         "total": total,
+        "fecha": datetime.now().isoformat() # Guardamos fecha
     }
 
     res = await pedidos_col.insert_one(doc_insert)
@@ -399,7 +524,7 @@ async def cambiar_estado_pedido(pedido_id: str, nuevo_estado: str = Query(...)):
 
     estado_anterior = doc["estado"]
 
-    # Si pasamos a "pagado" y antes no lo estaba, descontar stock
+    # Si pasa a PAGADO, descontar stock
     if nuevo_estado.lower() == "pagado" and estado_anterior.lower() != "pagado":
         for item in doc.get("items", []):
             prod_oid = item["producto_id"]
@@ -407,6 +532,7 @@ async def cambiar_estado_pedido(pedido_id: str, nuevo_estado: str = Query(...)):
             prod_doc = await productos_col.find_one({"_id": prod_oid})
             if not prod_doc:
                 continue
+            
             stock_actual = prod_doc.get("stock", 0)
             nuevo_stock = stock_actual - cantidad
             if nuevo_stock < 0:
@@ -419,10 +545,8 @@ async def cambiar_estado_pedido(pedido_id: str, nuevo_estado: str = Query(...)):
                 {"$set": {"stock": nuevo_stock}},
             )
 
-    # Actualizar estado
     await pedidos_col.update_one({"_id": oid}, {"$set": {"estado": nuevo_estado}})
     doc_actualizado = await pedidos_col.find_one({"_id": oid})
-
     return pedido_doc_to_out(doc_actualizado)
 
 
@@ -437,10 +561,13 @@ async def crear_boleta(boleta_in: BoletaIn):
     if not pedido_doc:
         raise HTTPException(status_code=404, detail="Pedido no encontrado")
 
-    if pedido_doc["estado"].lower() != "pagado":
-        raise HTTPException(status_code=400, detail="No se puede generar boleta de un pedido no pagado")
+    # Validación segura usando .get() por si es un pedido viejo
+    estado_actual = pedido_doc.get("estado", "pendiente")
+    if estado_actual.lower() != "pagado":
+        raise HTTPException(status_code=400, detail=f"No se puede generar boleta de un pedido no pagado (Estado: {estado_actual})")
 
-    total = float(pedido_doc["total"])
+    # Lectura segura del total
+    total = float(pedido_doc.get("total", 0.0))
 
     doc_insert = {
         "pedido_id": pedido_oid,
@@ -460,59 +587,3 @@ async def obtener_boleta(boleta_id: str):
     if not doc:
         raise HTTPException(status_code=404, detail="Boleta no encontrada")
     return boleta_doc_to_out(doc)
-
-
-@app.get("/generar_pdf_boleta")
-def generar_pdf_boleta(
-    numero: str,
-    fecha: str,
-    nombre: str,
-    correo: str,
-    items: str,
-    total: int
-):
-    """
-    Recibe datos por query y genera un PDF simple de boleta.
-    items llega como JSON string.
-    """
-
-    import json
-    items = json.loads(items)
-
-    buffer = BytesIO()
-    pdf = canvas.Canvas(buffer)
-
-    pdf.setTitle("Boleta Electrónica")
-
-    y = 800
-    pdf.drawString(50, y, f"Boleta Electrónica")
-    y -= 20
-    pdf.drawString(50, y, f"N°: {numero}")
-    y -= 20
-    pdf.drawString(50, y, f"Fecha: {fecha}")
-    y -= 40
-
-    pdf.drawString(50, y, f"Cliente: {nombre}")
-    y -= 20
-    pdf.drawString(50, y, f"Correo: {correo}")
-    y -= 40
-
-    pdf.drawString(50, y, "Detalle:")
-    y -= 20
-
-    for item in items:
-        pdf.drawString(60, y, f"{item['producto']} - x{item['cantidad']} - ${item['precio']} - Subtotal: ${item['subtotal']}")
-        y -= 20
-
-    y -= 20
-    pdf.drawString(50, y, f"TOTAL: ${total}")
-
-    pdf.save()
-    buffer.seek(0)
-
-    return StreamingResponse(
-        buffer,
-        media_type="application/pdf",
-        headers={"Content-Disposition": "inline; filename=boleta.pdf"}
-    )
-

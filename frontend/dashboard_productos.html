@@ -9,30 +9,23 @@
 </head>
 <body>
 
-<!-- 🔒 PROTECCIÓN ADMIN -->
 <script>
   const usuarioId = localStorage.getItem("usuario_id");
   const isAdmin = localStorage.getItem("is_admin");
 
-  // No hay sesión
   if (!usuarioId) {
     window.location.href = "login.html";
-  }
-
-  // Sesión pero NO es admin
-  if (isAdmin !== "true") {
+  } else if (isAdmin !== "true") {
     alert("Acceso denegado. Solo administradores.");
     window.location.href = "menu.html";
   }
 
-  // Función cerrar sesión
   function cerrarSesion() {
     localStorage.clear();
     window.location.href = "login.html";
   }
 </script>
 
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg">
   <div class="container">
     <a class="navbar-brand" href="index.html">Doggy's</a>
@@ -44,10 +37,18 @@
 
         <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
 
-        <li class="nav-item"><a class="nav-link active" href="dashboard_productos.html">Admin Productos</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
+            Panel Admin
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item active" href="dashboard_productos.html">Gestión Productos</a></li>
+            <li><a class="dropdown-item" href="reportes.html">Reportes Ventas</a></li>
+          </ul>
+        </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="#" onclick="cerrarSesion(); return false;">
+          <a class="nav-link text-warning" href="#" onclick="cerrarSesion(); return false;">
             Cerrar Sesión
           </a>
         </li>
@@ -57,20 +58,17 @@
   </div>
 </nav>
 
-<!-- Contenido principal -->
 <div class="container-main">
   <div class="container mt-5">
 
     <h2 class="mb-4">Gestión de Productos</h2>
 
-    <!-- Botón agregar producto -->
     <div class="mb-3">
       <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalProducto">
         Agregar Producto
       </button>
     </div>
 
-    <!-- Tabla de productos -->
     <table class="table table-striped" id="tablaProductos">
       <thead>
         <tr>
@@ -87,44 +85,35 @@
   </div>
 </div>
 
-<!-- Modal Crear/Editar Producto -->
 <div class="modal fade" id="modalProducto" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-
       <div class="modal-header">
         <h5 class="modal-title" id="modalTitulo">Nuevo Producto</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-
       <div class="modal-body">
         <form id="formProducto">
           <input type="hidden" id="producto_id">
-
           <div class="mb-3">
             <label class="form-label">Nombre</label>
             <input type="text" class="form-control" id="nombreProducto" required>
           </div>
-
           <div class="mb-3">
             <label class="form-label">Precio</label>
             <input type="number" class="form-control" id="precioProducto" required>
           </div>
-
           <div class="mb-3">
             <label class="form-label">Stock</label>
             <input type="number" class="form-control" id="stockProducto" required>
           </div>
-
           <div class="mb-3">
             <label class="form-label">URL Imagen (opcional)</label>
             <input type="text" class="form-control" id="imgProducto" placeholder="img/hotdog1.png">
           </div>
-
           <button type="submit" class="btn btn-primary w-100">Guardar</button>
         </form>
       </div>
-
     </div>
   </div>
 </div>

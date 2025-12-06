@@ -8,114 +8,60 @@
   <link rel="stylesheet" href="styles.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      height: 100%;
-      background-color: #FFFFFF;
-      color: #4A2C2A;
-      display: flex;
-      flex-direction: column;
-    }
-
+    html, body { height: 100%; display: flex; flex-direction: column; }
     .navbar { background-color: #D62828; }
     .navbar-brand, .nav-link { color: #FFFFFF !important; }
-
-    .cart-badge {
-      background-color: #F6BD60;
-      color: #4A2C2A;
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 12px;
-      margin-left: 4px;
-    }
-
-    .hero {
-      background-color: #F6BD60;
-      padding: 100px 0;
-      text-align: center;
-    }
-
-    .btn-cta {
-      background-color: #D62828;
-      color: #FFFFFF;
-      border: none;
-    }
-
-    .btn-cta:hover {
-      background-color: #F6BD60;
-      color: #4A2C2A;
-    }
-
-    .product-card {
-      border: 1px solid #F6BD60;
-      border-radius: 8px;
-      padding: 15px;
-      text-align: center;
-      background-color: #FFF8F0;
-      transition: transform 0.2s;
-    }
-
-    .product-card:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
-
-    .btn-add {
-      background-color: #D62828;
-      color: #FFFFFF;
-      border: none;
-    }
-
-    .btn-add:hover {
-      background-color: #F6BD60;
-      color: #4A2C2A;
-    }
-
+    .cart-badge { background-color: #F6BD60; color: #4A2C2A; padding: 2px 6px; border-radius: 10px; font-size: 12px; margin-left: 4px; }
+    .hero { background-color: #F6BD60; padding: 100px 0; text-align: center; }
+    .btn-cta { background-color: #D62828; color: #FFFFFF; border: none; }
+    .btn-cta:hover { background-color: #F6BD60; color: #4A2C2A; }
+    .product-card { border: 1px solid #F6BD60; border-radius: 8px; padding: 15px; text-align: center; background-color: #FFF8F0; transition: transform 0.2s; }
+    .product-card:hover { transform: scale(1.05); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .btn-add { background-color: #D62828; color: #FFFFFF; border: none; }
+    .btn-add:hover { background-color: #F6BD60; color: #4A2C2A; }
     main { flex: 1; }
-    footer {
-      background-color: #F6BD60;
-      padding: 15px 0;
-      text-align: center;
-    }
+    footer { background-color: #F6BD60; padding: 15px 0; text-align: center; }
   </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg">
   <div class="container">
     <a class="navbar-brand" href="index.html">Doggy's</a>
-
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarMenu">
-
       <ul class="navbar-nav ms-auto">
-
+        
         <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
 
-        <!-- Carrito -->
         <li class="nav-item">
           <a class="nav-link" href="menu_carrito.html">
             Carrito <span id="carritoCount" class="cart-badge">0</span>
           </a>
         </li>
 
-        <!-- Editar Perfil -->
-        <li class="nav-item">
-          <a class="nav-link" id="perfil-link" href="perfil.html" style="display:none;">Editar Perfil</a>
+        <li class="nav-item dropdown" id="admin-panel" style="display:none;">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            Panel Admin
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="dashboard_productos.html">Gestión Productos</a></li>
+            <li><a class="dropdown-item" href="reportes.html">Reportes Ventas</a></li>
+          </ul>
         </li>
 
-        <!-- Iniciar Sesión -->
+        <li class="nav-item">
+          <a class="nav-link" id="perfil-link" href="perfil.html" style="display:none;">Mi Perfil</a>
+        </li>
+
         <li class="nav-item">
           <a class="nav-link" id="login-link" href="login.html">Iniciar Sesión</a>
         </li>
-
-        <!-- Cerrar Sesión -->
         <li class="nav-item">
-          <a class="nav-link text-warning" id="logout-link" style="display:none; cursor:pointer;">Cerrar Sesión</a>
+          <a class="nav-link text-warning" id="logout-link" href="#" style="display:none;">Cerrar Sesión</a>
         </li>
 
       </ul>
@@ -123,141 +69,107 @@
   </div>
 </nav>
 
-<script>
-  // Mostrar opciones según sesión
-  const usuarioId = localStorage.getItem("usuario_id");
-
-  const loginLink = document.getElementById("login-link");
-  const perfilLink = document.getElementById("perfil-link");
-  const logoutLink = document.getElementById("logout-link");
-
-  if (usuarioId) {
-    loginLink.style.display = "none";
-    perfilLink.style.display = "block";
-    logoutLink.style.display = "block";
-  } else {
-    perfilLink.style.display = "none";
-    logoutLink.style.display = "none";
-  }
-
-  // Cerrar sesión
-  logoutLink.addEventListener("click", () => {
-    localStorage.removeItem("usuario_id");
-    localStorage.removeItem("carrito");
-    alert("Has cerrado sesión.");
-    window.location.reload();
-  });
-</script>
-
-<!-- CONTENIDO -->
 <main>
-
-  <!-- HERO -->
   <section class="hero">
     <h1>Bienvenido a Doggy's</h1>
     <p>Hot dogs y completos estilo americano, ¡directo a tu mesa!</p>
     <a href="menu.html" class="btn btn-cta btn-lg mt-3">Ver Menú</a>
   </section>
 
-  <!-- PRODUCTOS DINÁMICOS -->
   <section class="container py-5">
     <h2 class="text-center mb-4">Nuestros Productos</h2>
-
     <div class="row g-4 justify-content-center" id="productos-destacados">
-      <!-- Se rellena con JS -->
-    </div>
-
+      </div>
   </section>
-
 </main>
 
-<!-- FOOTER -->
 <footer>
   <p>&copy; 2025 Doggy's - Todos los derechos reservados</p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+<script src="js/menu.js"></script>
+
 <script>
 /* ===============================
-   MANEJO DEL CARRITO
+   LÓGICA NAVBAR & SESIÓN
 ================================ */
-function obtenerCarrito() {
-  try {
-    return JSON.parse(localStorage.getItem("carrito")) || [];
-  } catch {
-    return [];
-  }
-}
-
-function guardarCarrito(carrito) {
-  localStorage.setItem("carrito", JSON.stringify(carrito));
-}
-
-function actualizarCarritoNavbar() {
-  const carrito = obtenerCarrito();
-  document.getElementById("carritoCount").textContent = carrito.length;
-}
-
-function agregarAlCarrito(producto) {
+document.addEventListener("DOMContentLoaded", () => {
   const usuarioId = localStorage.getItem("usuario_id");
+  const isAdmin = localStorage.getItem("is_admin") === "true";
 
-  if (!usuarioId) {
-    alert("Debes iniciar sesión para agregar productos al carrito.");
-    return;
-  }
+  const loginLink = document.getElementById("login-link");
+  const logoutLink = document.getElementById("logout-link");
+  const perfilLink = document.getElementById("perfil-link");
+  const adminPanel = document.getElementById("admin-panel");
 
-  const carrito = obtenerCarrito();
-  const existe = carrito.find(item => item.producto_id === producto.id);
+  if (usuarioId) {
+    // Logueado
+    if (loginLink) loginLink.style.display = "none";
+    if (logoutLink) logoutLink.style.display = "block";
 
-  if (existe) {
-    existe.cantidad += 1;
-    existe.subtotal = existe.cantidad * existe.precio;
+    if (isAdmin) {
+      if (adminPanel) adminPanel.style.display = "block";
+      if (perfilLink) perfilLink.style.display = "none";
+    } else {
+      if (adminPanel) adminPanel.style.display = "none";
+      if (perfilLink) perfilLink.style.display = "block";
+    }
   } else {
-    carrito.push({
-      producto_id: producto.id,
-      nombre: producto.nombre,
-      precio: producto.precio,
-      cantidad: 1,
-      subtotal: producto.precio,
-      img: producto.img || ""
-    });
+    // No Logueado
+    if (loginLink) loginLink.style.display = "block";
+    if (logoutLink) logoutLink.style.display = "none";
+    if (adminPanel) adminPanel.style.display = "none";
+    if (perfilLink) perfilLink.style.display = "none";
   }
 
-  guardarCarrito(carrito);
-  actualizarCarritoNavbar();
+  // Logout
+  if(logoutLink) {
+      logoutLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = "index.html";
+      });
+  }
 
-  alert(`"${producto.nombre}" agregado al carrito.`);
-}
+  // Cargar productos del home
+  cargarProductosHome();
+});
 
 /* ===============================
-   CARGA DE PRODUCTOS DESDE LA API
+   CARGA DE PRODUCTOS (Home)
 ================================ */
-async function cargarProductos() {
+async function cargarProductosHome() {
   try {
     const res = await fetch("http://127.0.0.1:8000/productos");
     if (!res.ok) return;
 
     const productos = await res.json();
     const contenedor = document.getElementById("productos-destacados");
-
     contenedor.innerHTML = "";
+    
+    // Mostramos máximo 4 productos en el home
+    const destacados = productos.slice(0, 4);
 
-    productos.forEach(p => {
+    destacados.forEach(p => {
       const col = document.createElement("div");
       col.className = "col-sm-6 col-md-4 col-lg-3";
-
       col.innerHTML = `
-        <div class="product-card">
-          <img src="${p.img || 'placeholder.jpg'}" class="img-fluid mb-2" alt="${p.nombre}">
+        <div class="product-card h-100">
+          <img src="${p.img || 'placeholder.jpg'}" class="img-fluid mb-2" alt="${p.nombre}" style="max-height: 150px; object-fit: contain;">
           <h5>${p.nombre}</h5>
           <p>$${p.precio}</p>
           <button class="btn btn-add">Agregar al carrito</button>
-        </div>
-      `;
+        </div>`;
 
+      // AQUÍ USAMOS LA FUNCIÓN GLOBAL QUE VIENE DE menu.js
       col.querySelector(".btn-add").addEventListener("click", () => {
-        agregarAlCarrito(p);
+         if (typeof agregarAlCarrito === "function") {
+             agregarAlCarrito(p);
+         } else {
+             alert("Error: No se pudo cargar el carrito.");
+         }
       });
 
       contenedor.appendChild(col);
@@ -267,15 +179,6 @@ async function cargarProductos() {
     console.error("Error cargando productos:", err);
   }
 }
-
-/* ===============================
-          INICIO
-================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  actualizarCarritoNavbar();
-  cargarProductos();
-});
 </script>
-
 </body>
 </html>

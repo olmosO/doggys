@@ -42,12 +42,21 @@ async function cargarDatosBoleta() {
     let total = 0;
 
     for (const item of pedido.items) {
-      // Obtener información del producto
-      const resProd = await fetch(`http://127.0.0.1:8000/productos/${item.producto_id}`);
-      const producto = await resProd.json();
+      // Intentamos usar el nombre guardado, si no, lo buscamos
+      let nombre = item.nombre;
+      let precio = item.precio_unitario || 0;
+      
+      if (!nombre) {
+          try {
+            const resProd = await fetch(`http://127.0.0.1:8000/productos/${item.producto_id}`);
+            const producto = await resProd.json();
+            nombre = producto.nombre;
+            precio = producto.precio;
+          } catch {
+            nombre = "Producto";
+          }
+      }
 
-      const nombre = producto.nombre || "Producto";
-      const precio = producto.precio || 0;
       const cantidad = item.cantidad;
       const subtotal = precio * cantidad;
 
@@ -66,9 +75,6 @@ async function cargarDatosBoleta() {
 
     document.getElementById("totalPedido").textContent = total;
 
-    // Guardar para generar boleta después
-    window.__pedidoData = { pedido, total };
-
   } catch (err) {
     console.error(err);
     mensajeError.textContent = "Error al cargar datos de boleta.";
@@ -82,18 +88,9 @@ async function cargarDatosBoleta() {
 async function generarBoleta() {
   const mensajeExito = document.getElementById("mensajeExito");
   const mensajeError = document.getElementById("mensajeError");
-  const mensajeCampos = document.getElementById("mensajeCampos");
+  const btnGenerar = document.getElementById("btnGenerar"); // <--- Aquí definimos la variable
 
-  const nombreCliente = document.getElementById("nombreCliente").value.trim();
-  const correoCliente = document.getElementById("correoCliente").value.trim();
   const pedidoId = obtenerPedidoId();
-
-  if (!nombreCliente || !correoCliente) {
-    mensajeCampos.classList.remove("d-none");
-    return;
-  } else {
-    mensajeCampos.classList.add("d-none");
-  }
 
   try {
     const res = await fetch("http://127.0.0.1:8000/boletas", {
@@ -114,12 +111,24 @@ async function generarBoleta() {
     // Mostrar número de boleta
     document.getElementById("numBoleta").textContent = data.id;
 
-    mensajeExito.textContent = `Boleta #${data.id} generada correctamente por un total de $${data.total}. Será enviada a su correo electrónico.`;
+    // Mensaje de éxito
+    mensajeExito.textContent = `¡Listo! La boleta N° ${data.id} ha sido generada exitosamente. Se ha enviado una copia a su correo.`;
     mensajeExito.classList.remove("d-none");
     mensajeError.classList.add("d-none");
 
+    // --- CORRECCIÓN AQUÍ: Usamos btnGenerar en lugar de btn ---
+    if (btnGenerar) {
+      btnGenerar.disabled = true;
+      btnGenerar.textContent = "Procesando seguimiento...";
+    }
+
+    // Activar simulación
+    if (window.iniciarSimulacionPedido) {
+        window.iniciarSimulacionPedido();
+    }
+
   } catch (err) {
-    console.error(err);
+    console.error(err); // Aquí caía el error de referencia 'btn is not defined'
     mensajeError.textContent = "Error inesperado al generar la boleta.";
     mensajeError.classList.remove("d-none");
     mensajeExito.classList.add("d-none");

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +7,25 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-<!-- Navbar -->
+<script>
+  const usuarioId = localStorage.getItem("usuario_id");
+  const isAdmin = localStorage.getItem("is_admin");
+
+  if (!usuarioId) {
+    window.location.href = "login.html";
+  } else if (isAdmin !== "true") {
+    alert("Acceso denegado. Solo administradores.");
+    window.location.href = "menu.html";
+  }
+
+  function cerrarSesion() {
+    localStorage.clear();
+    window.location.href = "login.html";
+  }
+</script>
+
 <nav class="navbar navbar-expand-lg">
   <div class="container">
     <a class="navbar-brand" href="index.html">Doggy's</a>
@@ -20,20 +34,34 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarMenu">
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="dashboard_productos.html">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link active" href="reportes.html">Reportes</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="cerrarSesion()" style="cursor:pointer;">Cerrar Sesión</a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="menu.html">Menú</a></li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
+            Panel Admin
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="dashboard_productos.html">Gestión Productos</a></li>
+            <li><a class="dropdown-item active" href="reportes.html">Reportes Ventas</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link text-warning" href="#" onclick="cerrarSesion(); return false;">
+            Cerrar Sesión
+          </a>
+        </li>
+
       </ul>
     </div>
   </div>
 </nav>
 
-<!-- Contenido -->
 <div class="container mt-5">
 
   <h2 class="mb-4">Reportes de Ventas</h2>
 
-  <!-- Filtros -->
   <form id="formFiltros" class="row g-3 mb-4">
     <div class="col-md-4">
       <label class="form-label">Tipo de producto</label>
@@ -59,7 +87,6 @@
     </div>
   </form>
 
-  <!-- Tabla -->
   <table class="table table-striped" id="tablaReportes">
     <thead>
       <tr>
@@ -72,7 +99,6 @@
     <tbody></tbody>
   </table>
 
-  <!-- Mensaje sin resultados -->
   <div id="mensaje" class="alert alert-info d-none mt-3">
     No se encontraron ventas para los filtros seleccionados.
   </div>
@@ -84,13 +110,6 @@
     <p>© 2025 Doggy’s — Todos los derechos reservados.</p>
   </div>
 </footer>
-
-<script>
-function cerrarSesion() {
-  localStorage.clear();
-  window.location.href = "login.html";
-}
-</script>
 
 <script src="js/reportes.js"></script>
 <script src="inactividad.js"></script>
