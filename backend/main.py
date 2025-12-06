@@ -9,18 +9,16 @@ from pydantic import BaseModel, Field, EmailStr
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 
-import bcrypt  # Importamos la librería directa
+import bcrypt  # Importamos la librería directa para seguridad
 
-# --- SEGURIDAD (Sin passlib) ---
-
+# ---------------------------------------------------------
+# SEGURIDAD (Hashing de contraseñas)
+# ---------------------------------------------------------
 def get_password_hash(password: str) -> str:
-    """Encripta la contraseña usando bcrypt directo."""
-    # Convertimos a bytes
+    """Encripta la contraseña usando bcrypt."""
     pwd_bytes = password.encode('utf-8')
-    # Generamos salt y hasheamos
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(pwd_bytes, salt)
-    # Devolvemos como string para guardar en Mongo
     return hashed.decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -48,7 +46,7 @@ boletas_col = None
 
 
 # ---------------------------------------------------------
-# DATOS SEMILLA (Seed Data)
+# DATOS SEMILLA (Carga inicial automática)
 # ---------------------------------------------------------
 async def cargar_datos_iniciales():
     """Carga usuario admin y productos si las colecciones están vacías."""
@@ -137,11 +135,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="API Doggy's - MongoDB", version="2.0.0", lifespan=lifespan)
 
 # ---------------------------------------------------------
-# CORS (para que el frontend pueda llamar a la API)
+# CORS
 # ---------------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permite cualquier origen
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -157,7 +155,7 @@ def ensure_objectid(id_str: str) -> ObjectId:
     return ObjectId(id_str)
 
 
-# ----- Conversores de documentos Mongo a modelos de salida -----
+# ----- Conversores -----
 def usuario_doc_to_out(doc) -> "UsuarioOut":
     return UsuarioOut(
         id=str(doc["_id"]),
@@ -222,7 +220,16 @@ class UsuarioIn(BaseModel):
     telefono: Optional[str] = None
     direccion: Optional[str] = None
     is_admin: bool = False
-    password: str  # Campo obligatorio para registro
+    password: str  # Obligatoria para registro
+
+# --- NUEVO MODELO PARA ACTUALIZAR (Password opcional) ---
+class UsuarioUpdate(BaseModel):
+    nombre: Optional[str] = None
+    email: Optional[EmailStr] = None
+    telefono: Optional[str] = None
+    direccion: Optional[str] = None
+    is_admin: Optional[bool] = None
+    password: Optional[str] = None # Opcional al editar
 
 class UsuarioOut(BaseModel):
     id: str
@@ -231,7 +238,6 @@ class UsuarioOut(BaseModel):
     telefono: Optional[str] = None
     direccion: Optional[str] = None
     is_admin: bool = False
-    # No devolvemos la password en la respuesta
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -242,10 +248,7 @@ class ProductoIn(BaseModel):
     descripcion: Optional[str] = None
     precio: float = Field(gt=0, description="Precio > 0")
     stock: int = Field(ge=0, description="Stock no negativo")
-    img: Optional[str] = Field(
-        default=None,
-        description="URL o ruta relativa de imagen",
-    )
+    img: Optional[str] = Field(default=None)
     disponible: bool = True
 
 class ProductoOut(ProductoIn):
@@ -318,17 +321,27 @@ async def obtener_usuario(usuario_id: str):
     return usuario_doc_to_out(doc)
 
 
+# --- ACTUALIZAR USUARIO MEJORADO (Soporta edición parcial) ---
 @app.put("/usuarios/{usuario_id}", response_model=UsuarioOut, tags=["usuarios"])
-async def actualizar_usuario(usuario_id: str, usuario: UsuarioIn):
+async def actualizar_usuario(usuario_id: str, usuario: UsuarioUpdate):
     oid = ensure_objectid(usuario_id)
     
-    # Preparamos datos y volvemos a hashear la password si viene en el update
-    user_dict = usuario.model_dump()
-    user_dict["password"] = get_password_hash(user_dict["password"])
+    # 1. Filtramos los datos: Solo usamos lo que no sea None
+    user_dict = {k: v for k, v in usuario.model_dump().items() if v is not None}
 
+    # 2. Si enviaron password nueva, la encriptamos
+    if "password" in user_dict:
+        user_dict["password"] = get_password_hash(user_dict["password"])
+
+    if not user_dict:
+        raise HTTPException(status_code=400, detail="No se enviaron datos para actualizar")
+
+    # 3. Actualizamos en Mongo (usando $set)
     res = await usuarios_col.update_one({"_id": oid}, {"$set": user_dict})
+    
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
     doc = await usuarios_col.find_one({"_id": oid})
     return usuario_doc_to_out(doc)
 
@@ -340,13 +353,12 @@ async def login(credentials: LoginRequest):
     """
     doc = await usuarios_col.find_one({"email": credentials.email})
     
-    # 1. Verificar si existe el usuario
+    # 1. Verificar usuario
     if not doc:
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
 
     # 2. Verificar contraseña
-    # (Nota: Algunos usuarios antiguos del Seed podrían no tener 'password' si se creó antes del cambio.
-    #  Agregamos doc.get('password') para evitar crash, aunque fallará login)
+    # Usamos .get() por compatibilidad con usuarios antiguos sin pass
     if not verify_password(credentials.password, doc.get("password", "")):
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
 
@@ -485,7 +497,7 @@ async def crear_pedido(pedido: PedidoIn):
         items_db.append(
             {
                 "producto_id": prod_oid,
-                "nombre": prod_doc["nombre"], # Guardamos nombre para el reporte
+                "nombre": prod_doc["nombre"], # Guardamos nombre
                 "cantidad": item.cantidad,
                 "precio_unitario": precio,
                 "subtotal": subtotal,
@@ -497,7 +509,7 @@ async def crear_pedido(pedido: PedidoIn):
         "items": items_db,
         "estado": pedido.estado,
         "total": total,
-        "fecha": datetime.now().isoformat() # Guardamos fecha
+        "fecha": datetime.now().isoformat()
     }
 
     res = await pedidos_col.insert_one(doc_insert)
@@ -561,12 +573,10 @@ async def crear_boleta(boleta_in: BoletaIn):
     if not pedido_doc:
         raise HTTPException(status_code=404, detail="Pedido no encontrado")
 
-    # Validación segura usando .get() por si es un pedido viejo
     estado_actual = pedido_doc.get("estado", "pendiente")
     if estado_actual.lower() != "pagado":
         raise HTTPException(status_code=400, detail=f"No se puede generar boleta de un pedido no pagado (Estado: {estado_actual})")
 
-    # Lectura segura del total
     total = float(pedido_doc.get("total", 0.0))
 
     doc_insert = {
